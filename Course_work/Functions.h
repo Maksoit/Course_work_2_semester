@@ -65,3 +65,6 @@ void Delete(HPC head, PPC oldProduct);
 void Delete(HPM head, PPM oldProduct);
 
 void Delete(HPS head, PPS oldProduct);
+
+
+void Change(PPC product);

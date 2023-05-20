@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <algorithm>
 #include <Windows.h>
@@ -402,4 +403,121 @@ void Delete(HPS head, PPS oldProduct) {
 		prevOldProduct->next = temp;
 	}
 	head.count -= 1;
+}
+
+
+void Change(PPC product) {
+	int newCount;
+	cout << "Enter new count: ";
+	cin >> newCount;
+
+	product->count = newCount;
+	product->Price = product->PriceForOne * newCount;
+}
+
+void Change(PPS product) {
+	int newCount;
+	cout << "Enter new count: ";
+	cin >> newCount;
+
+	product->Count = newCount;
+}
+
+void Change(PPS product, string title, int newCount) {
+	product->Title = title;
+	product->Count = newCount;
+}
+
+void Change(PPM product, HPS headStorage) {
+	cout << "What do you want to change?\n1. Title\n2. Description\n 3. Price\n4. Avaible";
+	switch (EnterInsideChoice(4)) {
+	case 1: {
+		cout << "Enter new Title: ";
+		string newTitle;
+		getline(cin, newTitle);
+
+		PPS storage = SearchByName(product->Title, headStorage);
+		Change(storage, newTitle, storage->Count);
+
+		product->Title = newTitle;
+
+		
+		break;
+	}
+	case 2: {
+		cout << "Enter New Description: ";
+		string NewDescription;
+		getline(cin, NewDescription);
+		product->Description = NewDescription;
+		break;
+	}
+	case 3: {
+		cout << "Enter New Price: ";
+		int newPrice;
+		newPrice = EnterNum();
+		product->Price = newPrice;
+		break;
+	}
+	case 4: {
+		cout << "Enter new Avaible: ";
+		int newAvaible;
+		newAvaible = EnterNum();
+		product->Available = newAvaible;
+		break;
+	}
+	}
+}
+
+
+
+
+
+
+bool IsAlreadyIn(HPM headMarket, PPM product) {
+	PPM q = headMarket.Head;
+	while (q) {
+		if (not(q->Title == product->Title) && not(q->Description == product->Description) && not(q->Id == product->Id) &&
+			q->Price == product->Price && q->Available == product->Available) return true;
+		q = q->next;
+	}
+	return false;
+}
+
+
+
+void SaveMarket(HPM headMarket) {
+	ofstream file("Market.txt", ios::binary | ios::out);
+	if (file.is_open()) {
+		PPM temp = headMarket.Head;
+		while (temp != NULL) {
+			file.write((char*)&(*temp), sizeof((*temp)));
+			temp = temp->next;
+		}
+		file.close();
+	}
+}
+
+void LoadMarket(HPM headMarket) {
+	if (not(headMarket.IsIntialized)) {
+		headMarket.Head = NULL;
+		headMarket.count = 0;
+	}
+
+	ifstream file("Market.txt", ios::binary | ios::in);
+
+	if (file.is_open() && not(file.peek() == EOF)) {
+		while (file.peek() != EOF) {
+			PPM temp = new PM;
+			if (headMarket.count == 0) {
+				file.read((char*)&(*temp), sizeof((*temp)));
+				AddFirst(headMarket, temp);
+			}
+			else {
+				file.read((char*)&(*temp), sizeof((*temp)));
+				if (not(IsAlreadyIn(headMarket, temp))) AddLast(headMarket, temp);
+			}
+		}
+		file.close();
+	}
+	else cout << "Empty file or can't open!\n\n";
 }

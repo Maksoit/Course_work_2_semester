@@ -16,6 +16,7 @@ typedef ProductCart* PPC;
 
 struct HeadProductCart {
 	ProductCart* Head;
+	bool IsIntialized = false;
 	int count;
 };
 typedef HeadProductCart HPC;
@@ -34,6 +35,7 @@ typedef ProductMarket* PPM;
 
 struct HeadProductMarket {
 	ProductMarket* Head;
+	bool IsIntialized = false;
 	int count;
 };
 typedef HeadProductMarket HPM;
@@ -50,6 +52,7 @@ typedef ProductStorage* PPS;
 
 struct HeadProductStorage {
 	ProductStorage* Head;
+	bool IsIntialized = false;
 	int count;
 };
 typedef HeadProductStorage HPS;
