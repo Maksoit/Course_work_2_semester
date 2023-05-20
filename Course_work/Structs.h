@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 using namespace std;
 
 struct ProductCart {
@@ -56,3 +57,20 @@ struct HeadProductStorage {
 	int count;
 };
 typedef HeadProductStorage HPS;
+
+
+struct Orders {
+	int Id;
+	vector<PC> Cart;
+
+	Orders* next;
+};
+typedef Orders O;
+typedef Orders* PO;
+
+struct HeadOrders {
+	PO Head;
+	bool IsIntialized = false;
+	int count;
+};
+typedef HeadOrders HO;

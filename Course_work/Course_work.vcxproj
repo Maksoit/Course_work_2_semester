@@ -139,6 +139,9 @@
   <ItemGroup>
     <ResourceCompile Include="Course_work.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="Market.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

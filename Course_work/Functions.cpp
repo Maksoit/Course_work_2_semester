@@ -17,6 +17,8 @@ bool* InitializeActive(bool*& active) {
 	active[0] = true;
 	active[POINTS - 1] = true;
 
+	active[9] = true;
+
 	return active;
 }
 
@@ -92,7 +94,9 @@ void PrintInsideMenu(int _case, int end) {
 	};
 	string menu5[]{
 		"1. Delete product from cart",
-		"2. Delete product from market and storage"
+		"2. Delete product from market and storage",
+		"3. Delete all cart",
+		"4. Delete all market and storage"
 	};
 	string menu6[]{
 		"1. Search in cart",
@@ -103,6 +107,16 @@ void PrintInsideMenu(int _case, int end) {
 		"1. Change in cart",
 		"2. Change in market",
 		"3. Change in storage"
+	};
+	string menu9[]{
+		"1. Save Cart",
+		"2. Save Market",
+		"3. Save Storage"
+	};
+	string menu10[]{
+		"1. Load Cart",
+		"2. Load Market",
+		"3. Load Storage"
 	};
 	
 	SetColor(7);
@@ -125,6 +139,14 @@ void PrintInsideMenu(int _case, int end) {
 			break;
 		case 7:
 			cout << menu7[i] << endl;
+			break;
+		case 8:
+			break;
+		case 9:
+			cout << menu9[i] << endl;
+			break;
+		case 10:
+			cout << menu10[i] << endl;
 			break;
 		}
 	}
@@ -178,6 +200,7 @@ int EnterInsideChoice(int end) {
 		choice = EnterNum();
 	}
 	cout << endl;
+	cin.get();
 	return choice;
 }
 
@@ -186,6 +209,17 @@ int EnterInsideChoice(int end) {
 int GetNewId(HPM headMarket) {
 	int maxId = 0;
 	PPM current = headMarket.Head;
+	while (current) {
+		maxId = max(maxId, current->Id);
+		current = current->next;
+	}
+	maxId++;
+	return  maxId;
+}
+
+int GetNewId(HO headOrder) {
+	int maxId = 0;
+	PO current = headOrder.Head;
 	while (current) {
 		maxId = max(maxId, current->Id);
 		current = current->next;
@@ -216,6 +250,15 @@ PPM Create(HPM headMarket) {
 	}
 	else cout << "\nError with creating new product!\n";
 	return newProduct;
+}
+
+PO Create(HO headOrder, HPC headCart) {
+	PO newOrder = new O;
+	if (newOrder) {
+		newOrder->Id = GetNewId(headOrder);
+
+
+	}
 }
 
 PPS MarketToStorage(PPM newProduct) {
@@ -268,6 +311,14 @@ void AddFirst(HPS& head, PPS new_book) {
 	}
 }
 
+void AddFirst(HO& head, PO new_book) {
+	if (new_book) {
+		new_book->next = head.Head;
+		head.Head = new_book;
+		head.count += 1;
+	}
+}
+
 void AddAfter(HPC& head, PPC first_book, PPC second_book) {
 	if (first_book && second_book) {
 		PPC temp = first_book->next;
@@ -289,6 +340,15 @@ void AddAfter(HPM& head, PPM first_book, PPM second_book) {
 void AddAfter(HPS& head, PPS first_book, PPS second_book) {
 	if (first_book && second_book) {
 		PPS temp = first_book->next;
+		first_book->next = second_book;
+		second_book->next = temp;
+		head.count += 1;
+	}
+}
+
+void AddAfter(HO& head, PO first_book, PO second_book) {
+	if (first_book && second_book) {
+		PO temp = first_book->next;
 		first_book->next = second_book;
 		second_book->next = temp;
 		head.count += 1;
@@ -319,6 +379,17 @@ void AddLast(HPM& head, PPM new_book) {
 
 void AddLast(HPS& head, PPS new_book) {
 	PPS temp = head.Head;
+	if (not(temp)) AddFirst(head, new_book);
+	else {
+		while (temp->next) {
+			temp = temp->next;
+		}
+		AddAfter(head, temp, new_book);
+	}
+}
+
+void AddLast(HO& head, PO new_book) {
+	PO temp = head.Head;
 	if (not(temp)) AddFirst(head, new_book);
 	else {
 		while (temp->next) {
@@ -405,66 +476,98 @@ void Delete(HPS head, PPS oldProduct) {
 	head.count -= 1;
 }
 
+void DeleteAll(HPC headCart) {
+	PPC temp = headCart.Head;
+	while (temp) {
+		PPC temp2 = temp;
+		temp = temp->next;
+		delete (temp2);
+		}
+}
+
+void DeleteAll(HPM headMarket, HPS headStorage) {
+	PPM temp = headMarket.Head;
+	PPS temp_ = headStorage.Head;
+	while (temp) {
+		PPM temp2 = temp;
+		temp = temp->next;
+		delete (temp2);
+	}
+	while (temp_) {
+		PPS temp2_ = temp_;
+		temp_ = temp_->next;
+		delete (temp2_);
+	}
+}
+
 
 void Change(PPC product) {
-	int newCount;
-	cout << "Enter new count: ";
-	cin >> newCount;
+	if (product) {
+		int newCount;
+		cout << "Enter new count: ";
+		cin >> newCount;
 
-	product->count = newCount;
-	product->Price = product->PriceForOne * newCount;
+		product->count = newCount;
+		product->Price = product->PriceForOne * newCount;
+	}
 }
 
 void Change(PPS product) {
-	int newCount;
-	cout << "Enter new count: ";
-	cin >> newCount;
+	if (product) {
+		int newCount;
+		cout << "Enter new count: ";
+		cin >> newCount;
 
-	product->Count = newCount;
+		product->Count = newCount;
+	}
 }
 
 void Change(PPS product, string title, int newCount) {
-	product->Title = title;
-	product->Count = newCount;
+	if (product) {
+		product->Title = title;
+		product->Count = newCount;
+	}
 }
 
 void Change(PPM product, HPS headStorage) {
-	cout << "What do you want to change?\n1. Title\n2. Description\n 3. Price\n4. Avaible";
-	switch (EnterInsideChoice(4)) {
-	case 1: {
-		cout << "Enter new Title: ";
-		string newTitle;
-		getline(cin, newTitle);
+	if (product) {
+		cout << "What do you want to change?\n1. Title\n2. Description\n 3. Price\n4. Avaible\n";
+		switch (EnterInsideChoice(4)) {
+		case 1: {
+			cout << "Enter new Title: ";
+			string newTitle;
+			getline(cin, newTitle);
 
-		PPS storage = SearchByName(product->Title, headStorage);
-		Change(storage, newTitle, storage->Count);
+			PPS storage = SearchByName(product->Title, headStorage);
+			Change(storage, newTitle, storage->Count);
 
-		product->Title = newTitle;
+			product->Title = newTitle;
 
-		
-		break;
-	}
-	case 2: {
-		cout << "Enter New Description: ";
-		string NewDescription;
-		getline(cin, NewDescription);
-		product->Description = NewDescription;
-		break;
-	}
-	case 3: {
-		cout << "Enter New Price: ";
-		int newPrice;
-		newPrice = EnterNum();
-		product->Price = newPrice;
-		break;
-	}
-	case 4: {
-		cout << "Enter new Avaible: ";
-		int newAvaible;
-		newAvaible = EnterNum();
-		product->Available = newAvaible;
-		break;
-	}
+
+			break;
+		}
+		case 2: {
+			cout << "Enter New Description: ";
+			string NewDescription;
+			getline(cin, NewDescription);
+			product->Description = NewDescription;
+			break;
+		}
+		case 3: {
+			cout << "Enter New Price: ";
+			int newPrice;
+			newPrice = EnterNum();
+			product->Price = newPrice;
+			break;
+		}
+		case 4: {
+			cout << "Enter new Avaible: ";
+			int newAvaible;
+			newAvaible = EnterNum();
+			product->Available = newAvaible;
+			break;
+		}
+		}
 	}
 }
 
@@ -483,6 +586,24 @@ bool IsAlreadyIn(HPM headMarket, PPM product) {
 	return false;
 }
 
+bool IsAlreadyIn(HPS headStorage, PPS product) {
+	PPS q = headStorage.Head;
+	while (q) {
+		if (not(q->Title == product->Title) && not(q->Count == product->Count) && not(q->Id == product->Id)) return true;
+		q = q->next;
+	}
+	return false;
+}
+
+bool IsAlreadyIn(HPC headCart, PPC product) {
+	PPC q = headCart.Head;
+	while (q) {
+		if (not(q->Title == product->Title) && not(q->count == product->count) && not(q->Id == product->Id) &&
+			q->Price == product->Price && q->PriceForOne == product->PriceForOne) return true;
+		q = q->next;
+	}
+	return false;
+}
 
 
 void SaveMarket(HPM headMarket) {
@@ -497,10 +618,47 @@ void SaveMarket(HPM headMarket) {
 	}
 }
 
-void LoadMarket(HPM headMarket) {
+void SaveStorage(HPS headStorage) {
+	ofstream file("Storage.txt", ios::binary | ios::out);
+	if (file.is_open()) {
+		PPS temp = headStorage.Head;
+		while (temp != NULL) {
+			file.write((char*)&(*temp), sizeof((*temp)));
+			temp = temp->next;
+		}
+		file.close();
+	}
+}
+
+void SaveCart(HPC headCart) {
+	ofstream file("Cart.txt", ios::binary | ios::out);
+	if (file.is_open()) {
+		PPC temp = headCart.Head;
+		while (temp != NULL) {
+			file.write((char*)&(*temp), sizeof((*temp)));
+			temp = temp->next;
+		}
+		file.close();
+	}
+}
+
+void SaveOrder(HO headOrder) {
+	ofstream file("Cart.txt", ios::binary | ios::out);
+	if (file.is_open()) {
+		PO temp = headOrder.Head;
+		while (temp != NULL) {
+			file.write((char*)&(*temp), sizeof((*temp)));
+			temp = temp->next;
+		}
+		file.close();
+	}
+}
+
+void LoadMarket(HPM &headMarket) {
 	if (not(headMarket.IsIntialized)) {
 		headMarket.Head = NULL;
 		headMarket.count = 0;
+		headMarket.IsIntialized = true;
 	}
 
 	ifstream file("Market.txt", ios::binary | ios::in);
@@ -510,11 +668,97 @@ void LoadMarket(HPM headMarket) {
 			PPM temp = new PM;
 			if (headMarket.count == 0) {
 				file.read((char*)&(*temp), sizeof((*temp)));
+				temp->next = NULL;
 				AddFirst(headMarket, temp);
 			}
 			else {
 				file.read((char*)&(*temp), sizeof((*temp)));
+				temp->next = NULL;
 				if (not(IsAlreadyIn(headMarket, temp))) AddLast(headMarket, temp);
+			}
+		}
+		file.close();
+	}
+	else cout << "Empty file or can't open!\n\n";
+}
+
+void LoadStorage(HPS& headStorage) {
+	if (not(headStorage.IsIntialized)) {
+		headStorage.Head = NULL;
+		headStorage.count = 0;
+		headStorage.IsIntialized = true;
+	}
+
+	ifstream file("Storage.txt", ios::binary | ios::in);
+
+	if (file.is_open() && not(file.peek() == EOF)) {
+		while (file.peek() != EOF) {
+			PPS temp = new PS;
+			if (headStorage.count == 0) {
+				file.read((char*)&(*temp), sizeof((*temp)));
+				temp->next = NULL;
+				AddFirst(headStorage, temp);
+			}
+			else {
+				file.read((char*)&(*temp), sizeof((*temp)));
+				temp->next = NULL;
+				if (not(IsAlreadyIn(headStorage, temp))) AddLast(headStorage, temp);
+			}
+		}
+		file.close();
+	}
+	else cout << "Empty file or can't open!\n\n";
+}
+
+void LoadCart(HPC& headCart) {
+	if (not(headCart.IsIntialized)) {
+		headCart.Head = NULL;
+		headCart.count = 0;
+		headCart.IsIntialized = true;
+	}
+
+	ifstream file("Cart.txt", ios::binary | ios::in);
+
+	if (file.is_open() && not(file.peek() == EOF)) {
+		while (file.peek() != EOF) {
+			PPC temp = new PC;
+			if (headCart.count == 0) {
+				file.read((char*)&(*temp), sizeof((*temp)));
+				temp->next = NULL;
+				AddFirst(headCart, temp);
+			}
+			else {
+				file.read((char*)&(*temp), sizeof((*temp)));
+				temp->next = NULL;
+				if (not(IsAlreadyIn(headCart, temp))) AddLast(headCart, temp);
+			}
+		}
+		file.close();
+	}
+	else cout << "Empty file or can't open!\n\n";
+}
+
+void LoadOrder(HO& headOrder) {
+	if (not(headOrder.IsIntialized)) {
+		headOrder.Head = NULL;
+		headOrder.count = 0;
+		headOrder.IsIntialized = true;
+	}
+
+	ifstream file("Order.txt", ios::binary | ios::in);
+
+	if (file.is_open() && not(file.peek() == EOF)) {
+		while (file.peek() != EOF) {
+			PO temp = new O;
+			if (headOrder.count == 0) {
+				file.read((char*)&(*temp), sizeof((*temp)));
+				temp->next = NULL;
+				AddFirst(headOrder, temp);
+			}
+			else {
+				file.read((char*)&(*temp), sizeof((*temp)));
+				temp->next = NULL;
+				AddLast(headOrder, temp);
 			}
 		}
 		file.close();

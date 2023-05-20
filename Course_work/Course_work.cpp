@@ -3,6 +3,7 @@
 #include <fstream>
 #include <Windows.h>
 #include <string>
+#include <vector>
 
 #include "Structs.h"
 #include "Functions.h"
@@ -33,6 +34,7 @@ int main()
 			active[3] = true;
 			active[4] = true;
 			active[5] = true;
+			active[9] = true;
 			active[POINTS - 1] = true;
 			cout << "Empty cart list, market list and storage list created!\n\n";
 			break;
@@ -75,6 +77,16 @@ int main()
 			PrintInsideMenu(4, 2);
 			string name;
 			string prevName;
+			if (!headCart.IsIntialized) {
+				headCart.Head = NULL; headCart.count = 0; headCart.IsIntialized = true;
+			}
+			if (!headMarket.IsIntialized) {
+				headMarket.Head = NULL; headMarket.count = 0; headMarket.IsIntialized = true;
+			}
+			if (!headStorage.IsIntialized) {
+				headStorage.Head = NULL; headStorage.count = 0; headStorage.IsIntialized = true;
+			}
+			cin.get();
 			switch (EnterInsideChoice(2)) {
 			case 1:
 				cout << "1. Add first\n2. Add last\n3. Add after\n";
@@ -100,6 +112,8 @@ int main()
 					cout << "You added that product!\n";
 					break;
 				}
+				active[6] = true;
+				active[7] = true;
 				break;
 			case 2:
 			{
@@ -129,6 +143,7 @@ int main()
 					cout << "You added that product!\n";
 					break;
 				}
+				active[6] = true;
 				break;
 				}
 			}
@@ -136,12 +151,14 @@ int main()
 				cout << "Some error in main in switch in case 4\n";
 				break;
 			}
+
+			active[8] = true;
 			break;
 		}
 		case 5: {
-			PrintInsideMenu(5, 2);
+			PrintInsideMenu(5, 4);
 			string title;
-			switch (EnterInsideChoice(2)) {
+			switch (EnterInsideChoice(4)) {
 			case 1:
 			{
 				cout << "Enter title of deleting product";
@@ -185,6 +202,12 @@ int main()
 				else cout << "There are no product with that title!\n";
 				break;
 			}
+			case 3:
+				DeleteAll(headCart);
+				break;
+			case 4: 
+				DeleteAll(headMarket, headStorage);
+				break;
 			default:
 				cout << "Some error in main in switch in case 5\n\n";
 				break;
@@ -195,21 +218,24 @@ int main()
 			PrintInsideMenu(6, 3);
 			string title;
 			switch (EnterInsideChoice(3)) {
-			case 1:
+			case 1: {
 				cout << "Enter title for searching: ";
 				cin >> title;
 				PPC product = SearchByName(title, headCart);
 				break;
-			case 2:
+			}
+			case 2: {
 				cout << "Enter title for searching: ";
 				cin >> title;
 				PPM product = SearchByName(title, headMarket);
 				break;
-			case 3:
+			}
+			case 3: {
 				cout << "Enter title for searching: ";
 				cin >> title;
 				PPS product = SearchByName(title, headStorage);
 				break;
+			}
 			default:
 				cout << "Some error in main in switch in case 6\n\n";
 				break;
@@ -218,17 +244,24 @@ int main()
 		}
 		case 7: {
 			PrintInsideMenu(7, 3);
+			string Title;
 			switch (EnterInsideChoice(3)) {
 			case 1: {
-
+				cout << "Enter name of product, that you want to change: ";
+				getline(cin, Title);
+				Change(SearchByName(Title, headCart));
 				break;
 			}
 			case 2: {
-
+				cout << "Enter name of product, that you want to change: ";
+				getline(cin, Title);
+				Change(SearchByName(Title, headMarket), headStorage);
 				break;
 			}
 			case 3: {
-
+				cout << "Enter name of product, that you want to change: ";
+				getline(cin, Title);
+				Change(SearchByName(Title, headStorage));
 				break;
 			}
 			default:
@@ -236,6 +269,65 @@ int main()
 				break;
 			}
 
+			break;
+		}
+		case 8: {
+			HO headOrder;
+			headOrder.Head = NULL;
+			headOrder.count = 0;
+			headOrder.IsIntialized = true;
+
+
+
+			break;
+		}
+		case 9: {
+			PrintInsideMenu(9, 2);
+			switch (EnterInsideChoice(2)) {
+			case 1:
+				SaveCart(headCart);
+				cout << "\nCart saved in cart.txt!\n\n";
+				break;
+			case 2:
+				SaveMarket(headMarket);
+				SaveStorage(headStorage);
+				cout << "\Storage saved in storage.txt!\n\n";
+				cout << "\nMarket saved in market.txt!\n\n";
+				break;
+			case 3:
+				SaveStorage(headStorage);
+				cout << "\Storage saved in storage.txt!\n\n";
+				break;
+			}
+			break;
+		}
+		case 10: {
+			PrintInsideMenu(10, 2);
+			switch (EnterInsideChoice(2)) {
+			case 1:
+				LoadCart(headCart);
+				cout << "\nCart loaded from cart.txt!\n\n";
+				break;
+			case 2:
+				LoadMarket(headMarket);
+				LoadStorage(headStorage);
+				cout << "\nMarket loaded from market.txt!\n\n";
+				cout << "\Storage loaded from storage.txt!\n\n";
+				break;
+			case 3:
+				LoadStorage(headStorage);
+				cout << "\Storage loaded from storage.txt!\n\n";
+				break;
+			}
+			for (int i = 0; i < POINTS; i++) active[i] = false;
+			active[1] = true;
+			active[2] = true;
+			active[3] = true;
+			active[4] = true;
+			active[5] = true;
+			active[6] = true;
+			active[9] = true;
+			active[POINTS - 1] = true;
 			break;
 		}
 		case 11:
