@@ -6,7 +6,6 @@
 
 #include "Structs.h"
 #define POINTS 11
-#define INSIDE_MENUS 1
 #define WIDTH 20
 using namespace std;
 
@@ -86,6 +85,24 @@ void PrintInsideMenu(int _case, int end) {
 	"2. Print products in market",
 	"3. Print products in storage",
 	};
+	string menu4[]{
+	"1. Add products in cart",
+	"2. Add products in market",
+	};
+	string menu5[]{
+		"1. Delete product from cart",
+		"2. Delete product from market and storage"
+	};
+	string menu6[]{
+		"1. Search in cart",
+		"2. Search in market",
+		"3. Search in storage"
+	};
+	string menu7[]{
+		"1. Change in cart",
+		"2. Change in market",
+		"3. Change in storage"
+	};
 	
 	SetColor(7);
 	for (int i = 0; i < end; i++) {
@@ -95,6 +112,18 @@ void PrintInsideMenu(int _case, int end) {
 			break;
 		case 3:
 			cout << menu3[i] << endl;
+			break;
+		case 4: 
+			cout << menu4[i] << endl;
+			break;
+		case 5:
+			cout << menu5[i] << endl;
+			break;
+		case 6:
+			cout << menu6[i] << endl;
+			break;
+		case 7:
+			cout << menu7[i] << endl;
 			break;
 		}
 	}
@@ -128,10 +157,10 @@ void PrintList(HPM head) {
 void PrintList(HPS head) {
 	PPS current = head.Head;
 	int i = 0;
-	cout << "N" << setw(WIDTH) << "Id" << setw(WIDTH) << "Title" << setw(WIDTH) << "Count" << setw(WIDTH) << endl;
+	cout << "N" << setw(WIDTH) << "Id" << setw(WIDTH) << "Title" << setw(WIDTH) << "Count" << endl;
 	while (current != NULL) {
 		i++;
-		cout << i << setw(WIDTH) << current->Id << setw(WIDTH) << current->Title << setw(WIDTH) << current->Count << setw(WIDTH) << endl;
+		cout << i << setw(WIDTH) << current->Id << setw(WIDTH) << current->Title << setw(WIDTH) << current->Count << endl;
 		current = current->next;
 	}
 	cout << endl;
@@ -153,14 +182,23 @@ int EnterInsideChoice(int end) {
 
 
 
-int GetNewId() {
-	//somehow
+int GetNewId(HPM headMarket) {
+	int maxId = 0;
+	PPM current = headMarket.Head;
+	while (current) {
+		maxId = max(maxId, current->Id);
+		current = current->next;
+	}
+	maxId++;
+	return  maxId;
 }
 
-PPM Create() {
+
+
+PPM Create(HPM headMarket) {
 	PPM newProduct = new PM;
 	if (newProduct) {
-		newProduct->Id = GetNewId();
+		newProduct->Id = GetNewId(headMarket);
 
 		cout << "Enter title of a product: ";
 		cin >> newProduct->Title;
@@ -179,30 +217,81 @@ PPM Create() {
 	return newProduct;
 }
 
+PPS MarketToStorage(PPM newProduct) {
+	PPS newStorage = new PS;
+	if (newStorage) {
+		newStorage->Id = newProduct->Id;
+		newStorage->Title = newProduct->Title;
+		newStorage->Count = 0;
+		newStorage->next = NULL;
+	}
+	else cout << "\nError with creating new product!\n";
+	return newStorage;
+}
+
+PPC MarketToCart(PPM marketProduct) {
+	if (marketProduct) {
+		PPC cartProduct = new PC;
+		cartProduct->Id = marketProduct->Id;
+		cartProduct->Title = marketProduct->Title;
+		cartProduct->count = 1;
+		cartProduct->Price = marketProduct->Price;
+		cartProduct->PriceForOne = marketProduct->Price;
+		cartProduct->next = NULL;
+		return cartProduct;
+	}
+	return NULL;
+}
+
 void AddFirst(HPC& head, PPC new_book) {
-	new_book->next = head.Head;
-	head.Head = new_book;
-	head.count += 1;
+	if (new_book) {
+		new_book->next = head.Head;
+		head.Head = new_book;
+		head.count += 1;
+	}
 }
 
 void AddFirst(HPM& head, PPM new_book) {
-	new_book->next = head.Head;
-	head.Head = new_book;
-	head.count += 1;
+	if (new_book) {
+		new_book->next = head.Head;
+		head.Head = new_book;
+		head.count += 1;
+	}
+}
+
+void AddFirst(HPS& head, PPS new_book) {
+	if (new_book) {
+		new_book->next = head.Head;
+		head.Head = new_book;
+		head.count += 1;
+	}
 }
 
 void AddAfter(HPC& head, PPC first_book, PPC second_book) {
-	PPC temp = first_book->next;
-	first_book->next = second_book;
-	second_book->next = temp;
-	head.count += 1;
+	if (first_book && second_book) {
+		PPC temp = first_book->next;
+		first_book->next = second_book;
+		second_book->next = temp;
+		head.count += 1;
+	}
 }
 
 void AddAfter(HPM& head, PPM first_book, PPM second_book) {
-	PPM temp = first_book->next;
-	first_book->next = second_book;
-	second_book->next = temp;
-	head.count += 1;
+	if (first_book && second_book) {
+		PPM temp = first_book->next;
+		first_book->next = second_book;
+		second_book->next = temp;
+		head.count += 1;
+	}
+}
+
+void AddAfter(HPS& head, PPS first_book, PPS second_book) {
+	if (first_book && second_book) {
+		PPS temp = first_book->next;
+		first_book->next = second_book;
+		second_book->next = temp;
+		head.count += 1;
+	}
 }
 
 void AddLast(HPC& head, PPC new_book) {
@@ -225,4 +314,92 @@ void AddLast(HPM& head, PPM new_book) {
 		}
 		AddAfter(head, temp, new_book);
 	}
+}
+
+void AddLast(HPS& head, PPS new_book) {
+	PPS temp = head.Head;
+	if (not(temp)) AddFirst(head, new_book);
+	else {
+		while (temp->next) {
+			temp = temp->next;
+		}
+		AddAfter(head, temp, new_book);
+	}
+}
+
+PPC SearchByName(string name, HPC head) {
+	PPC current = head.Head;
+	while (current && current->Title != name) current = current->next;
+
+	return current;
+}
+
+PPM SearchByName(string name, HPM head) {
+	PPM current = head.Head;
+	while (current && current->Title != name) current = current->next;
+
+	return current;
+}
+
+PPS SearchByName(string name, HPS head) {
+	PPS current = head.Head;
+	while (current && current->Title != name) current = current->next;
+
+	return current;
+}
+
+
+
+void Delete(HPC head, PPC oldProduct) {
+	if (head.Head == oldProduct) {
+		PPC temp = oldProduct->next;
+		delete (oldProduct);
+		head.Head = temp;
+	}
+	else {
+		PPC prevOldProduct = head.Head;
+		while (prevOldProduct->next != oldProduct) {
+			prevOldProduct = prevOldProduct->next;
+		}
+		PPC temp = oldProduct->next;
+		delete (oldProduct);
+		prevOldProduct->next = temp;
+	}
+	head.count -= 1;
+}
+
+void Delete(HPM head, PPM oldProduct) {
+	if (head.Head == oldProduct) {
+		PPM temp = oldProduct->next;
+		delete (oldProduct);
+		head.Head = temp;
+	}
+	else {
+		PPM prevOldProduct = head.Head;
+		while (prevOldProduct->next != oldProduct) {
+			prevOldProduct = prevOldProduct->next;
+		}
+		PPM temp = oldProduct->next;
+		delete (oldProduct);
+		prevOldProduct->next = temp;
+	}
+	head.count -= 1;
+}
+
+void Delete(HPS head, PPS oldProduct) {
+	if (head.Head == oldProduct) {
+		PPS temp = oldProduct->next;
+		delete (oldProduct);
+		head.Head = temp;
+	}
+	else {
+		PPS prevOldProduct = head.Head;
+		while (prevOldProduct->next != oldProduct) {
+			prevOldProduct = prevOldProduct->next;
+		}
+		PPS temp = oldProduct->next;
+		delete (oldProduct);
+		prevOldProduct->next = temp;
+	}
+	head.count -= 1;
 }

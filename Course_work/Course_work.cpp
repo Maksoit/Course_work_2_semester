@@ -71,28 +71,173 @@ int main()
 			}
 			break;
 		case 4:
+		{
 			PrintInsideMenu(4, 2);
+			string name;
+			string prevName;
 			switch (EnterInsideChoice(2)) {
 			case 1:
-				cout << "1. Add first\n2. Add last\n3. Add after";
+				cout << "1. Add first\n2. Add last\n3. Add after\n";
 				switch (EnterInsideChoice(3)) {
 				case 1:
-					AddFirst(headCart, CartByName());
+					cout << "Enter name of product that you want to add first in your cart: ";
+					cin >> name;
+					AddFirst(headCart, MarketToCart(SearchByName(name, headMarket)));
+					cout << "You added that product!\n";
 					break;
 				case 2:
+					cout << "Enter name of product that you want to add last in your cart: ";
+					cin >> name;
+					AddLast(headCart, MarketToCart(SearchByName(name, headMarket)));
+					cout << "You added that product!\n";
 					break;
 				case 3:
+					cout << "Enter name of product that you want to add in your cart: ";
+					cin >> name;
+					cout << "Enter name of product after that you want to add in your cart: ";
+					cin >> prevName;
+					AddAfter(headCart, SearchByName(prevName, headCart), MarketToCart(SearchByName(name, headMarket)));
+					cout << "You added that product!\n";
 					break;
 				}
 				break;
 			case 2:
-				PrintList(headMarket);
+			{
+				cout << "1. Add first\n2. Add last\n3. Add after\n";
+				PPM newMarketProduct;
+				switch (EnterInsideChoice(3)) {
+				case 1: {
+					PPM newMarketProduct = Create(headMarket);
+					AddFirst(headMarket, newMarketProduct);
+					AddFirst(headStorage, MarketToStorage(newMarketProduct));
+					cout << "You added that product!\n";
+					break; }
+				case 2: {
+					PPM newMarketProduct = Create(headMarket);
+					AddLast(headMarket, newMarketProduct);
+					AddLast(headStorage, MarketToStorage(newMarketProduct));
+					cout << "You added that product!\n";
+					break; }
+				case 3:
+				{
+					PPM newMarketProduct = Create(headMarket);
+					string name;
+					cout << "Enter title of product after that you want to add new product: ";
+					cin >> name;
+					AddAfter(headMarket, SearchByName(name, headMarket), newMarketProduct);
+					AddAfter(headStorage, SearchByName(name, headStorage), MarketToStorage(newMarketProduct));
+					cout << "You added that product!\n";
+					break;
+				}
 				break;
+				}
+			}
 			default:
-				cout << "Some error in main in switch in case 3\n";
+				cout << "Some error in main in switch in case 4\n";
 				break;
 			}
 			break;
+		}
+		case 5: {
+			PrintInsideMenu(5, 2);
+			string title;
+			switch (EnterInsideChoice(2)) {
+			case 1:
+			{
+				cout << "Enter title of deleting product";
+				cin >> title;
+				PPC oldProduct = SearchByName(title, headCart);
+				if (not(oldProduct)) {
+					Delete(headCart, oldProduct);
+					cout << "\nProduct named " << title << " is deleted!\n\n";
+					if (not(headCart.count)) {
+						for (int i = 0; i < POINTS; i++) active[i] = false;
+						active[1] = true;
+						active[2] = true;
+						active[3] = true;
+						active[4] = true;
+						active[5] = true;
+						active[POINTS - 1] = true;
+					}
+				}
+				else cout << "There are no product with that title!\n";
+				break;
+			}
+			case 2:
+			{
+				cout << "Enter title of deleting product";
+				cin >> title;
+				PPM oldProduct = SearchByName(title, headMarket);
+				if (not(oldProduct)) {
+					Delete(headMarket, oldProduct);
+					Delete(headStorage, MarketToStorage(oldProduct));
+					cout << "\nProduct named " << title << " is deleted!\n\n";
+					if (not(headCart.count)) {
+						for (int i = 0; i < POINTS; i++) active[i] = false;
+						active[1] = true;
+						active[2] = true;
+						active[3] = true;
+						active[4] = true;
+						active[5] = true;
+						active[POINTS - 1] = true;
+					}
+				}
+				else cout << "There are no product with that title!\n";
+				break;
+			}
+			default:
+				cout << "Some error in main in switch in case 5\n\n";
+				break;
+			}
+			break;
+		}
+		case 6: {
+			PrintInsideMenu(6, 3);
+			string title;
+			switch (EnterInsideChoice(3)) {
+			case 1:
+				cout << "Enter title for searching: ";
+				cin >> title;
+				PPC product = SearchByName(title, headCart);
+				break;
+			case 2:
+				cout << "Enter title for searching: ";
+				cin >> title;
+				PPM product = SearchByName(title, headMarket);
+				break;
+			case 3:
+				cout << "Enter title for searching: ";
+				cin >> title;
+				PPS product = SearchByName(title, headStorage);
+				break;
+			default:
+				cout << "Some error in main in switch in case 6\n\n";
+				break;
+			}
+			break;
+		}
+		case 7: {
+			PrintInsideMenu(7, 3);
+			switch (EnterInsideChoice(3)) {
+			case 1: {
+
+				break;
+			}
+			case 2: {
+
+				break;
+			}
+			case 3: {
+
+				break;
+			}
+			default:
+				cout << "Some error in main in switch in case 7\n\n";
+				break;
+			}
+
+			break;
+		}
 		case 11:
 			cout << "Thanks for using my system!\nGoodbye!\nMV\n";
 			mainFlag = false;
