@@ -7,6 +7,7 @@
 
 #include "Structs.h"
 #define POINTS 11
+#define POINTSUSER 9
 #define WIDTH 20
 using namespace std;
 
@@ -22,12 +23,22 @@ bool* InitializeActive(bool*& active) {
 	return active;
 }
 
+bool* InitializeActiveUser(bool*& activeUser) {
+	activeUser = new bool[POINTSUSER];
+	for (int i = 0; i < POINTSUSER; i++) activeUser[i] = false;
+
+	activeUser[0] = true;
+	activeUser[POINTSUSER - 1] = true;
+
+	return activeUser;
+}
+
 void SetColor(int attr) {
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 	SetConsoleTextAttribute(hConsole, attr);
 }
 
-void PrintMenu(bool *active) {
+void PrintAdminMenu(bool *active) {
 	const char* Menu[] = {
 	"1. Create empty market and empty storage",
 	"2. Statictic",
@@ -49,9 +60,58 @@ void PrintMenu(bool *active) {
 	cout << endl;
 }
 
+void PrintUserMenu(bool* activeUser) {
+	const char* Menu[] = {
+	"1. Create cart and load market",
+	"2. Statictic",
+	"3. Print",
+	"4. Add",
+	"5. Delete",
+	"6. Search",
+	"7. Change",
+	"8. Buy",
+	"9. Exit"
+	};
+	for (int i = 0; i < POINTSUSER; i++) {
+		activeUser[i] ? SetColor(7) : SetColor(8);
+		cout << Menu[i] << endl;
+	}
+	SetColor(7);
+	cout << endl;
+}
+
 bool IsRightDigit(string& str)
 {
 	return ( !str.empty() && all_of(str.begin(), str.end(), ::isdigit) );
+}
+
+bool IsAlreadyIn(HPM headMarket, PPM product) {
+	PPM q = headMarket.Head;
+	while (q) {
+		if ((q->Title == product->Title) && (q->Description == product->Description) && (q->Id == product->Id) &&
+			q->Price == product->Price) return true;
+		q = q->next;
+	}
+	return false;
+}
+
+bool IsAlreadyIn(HPS headStorage, PPS product) {
+	PPS q = headStorage.Head;
+	while (q) {
+		if (not(q->Title == product->Title) && not(q->Count == product->Count) && not(q->Id == product->Id)) return true;
+		q = q->next;
+	}
+	return false;
+}
+
+bool IsAlreadyIn(HPC headCart, PPC product) {
+	PPC q = headCart.Head;
+	while (q) {
+		if (not(q->Title == product->Title) && not(q->count == product->count) && not(q->Id == product->Id) &&
+			q->Price == product->Price && q->PriceForOne == product->PriceForOne) return true;
+		q = q->next;
+	}
+	return false;
 }
 
 int EnterNum() {
@@ -74,6 +134,7 @@ int EnterChoice(bool *active) {
 		choice = EnterNum();
 	}
 	cout << endl;
+	cin.get();
 	return choice;
 }
 
@@ -153,6 +214,24 @@ void PrintInsideMenu(int _case, int end) {
 	cout << endl;
 }
 
+void PrintInsideMenuUser(int _case, int end) {
+	string menu4[]{
+	"1. Add first",
+	"2. Add after",
+	"3. Add last",
+	};
+
+	SetColor(7);
+	for (int i = 0; i < end; i++) {
+		switch (_case) {
+		case 4:
+			cout << menu4[i] << endl;
+			break;
+		}
+	}
+	cout << endl;
+}
+
 void PrintList(HPC head) {
 	PPC current = head.Head;
 	int i = 0;
@@ -171,7 +250,9 @@ void PrintList(HPM head) {
 	cout << "N" << setw(WIDTH) << "Id" << setw(WIDTH) << "Title" << setw(WIDTH) << "Price" << setw(WIDTH) << "Description" << setw(WIDTH) << "Available" << endl;
 	while (current != NULL) {
 		i++;
+		current->Available ? SetColor(7) : SetColor(8);
 		cout << i << setw(WIDTH) << current->Id << setw(WIDTH) << current->Title << setw(WIDTH) << current->Price << setw(WIDTH) << current->Description << setw(WIDTH) << current->Available << endl;
+		SetColor(7);
 		current = current->next;
 	}
 	cout << endl;
@@ -217,16 +298,7 @@ int GetNewId(HPM headMarket) {
 	return  maxId;
 }
 
-int GetNewId(HO headOrder) {
-	int maxId = 0;
-	PO current = headOrder.Head;
-	while (current) {
-		maxId = max(maxId, current->Id);
-		current = current->next;
-	}
-	maxId++;
-	return  maxId;
-}
+
 
 
 
@@ -247,19 +319,13 @@ PPM Create(HPM headMarket) {
 		newProduct->Available = false;
 
 		newProduct->next = NULL;
+		return newProduct;
 	}
 	else cout << "\nError with creating new product!\n";
-	return newProduct;
+	return NULL;
 }
 
-PO Create(HO headOrder, HPC headCart) {
-	PO newOrder = new O;
-	if (newOrder) {
-		newOrder->Id = GetNewId(headOrder);
 
-
-	}
-}
 
 PPS MarketToStorage(PPM newProduct) {
 	PPS newStorage = new PS;
@@ -274,7 +340,7 @@ PPS MarketToStorage(PPM newProduct) {
 }
 
 PPC MarketToCart(PPM marketProduct) {
-	if (marketProduct) {
+	if (marketProduct && marketProduct->Available) {
 		PPC cartProduct = new PC;
 		cartProduct->Id = marketProduct->Id;
 		cartProduct->Title = marketProduct->Title;
@@ -288,7 +354,7 @@ PPC MarketToCart(PPM marketProduct) {
 }
 
 void AddFirst(HPC& head, PPC new_book) {
-	if (new_book) {
+	if (new_book && !IsAlreadyIn(head, new_book)) {
 		new_book->next = head.Head;
 		head.Head = new_book;
 		head.count += 1;
@@ -422,25 +488,27 @@ PPS SearchByName(string name, HPS head) {
 
 
 
-void Delete(HPC head, PPC oldProduct) {
-	if (head.Head == oldProduct) {
-		PPC temp = oldProduct->next;
-		delete (oldProduct);
-		head.Head = temp;
-	}
-	else {
-		PPC prevOldProduct = head.Head;
-		while (prevOldProduct->next != oldProduct) {
-			prevOldProduct = prevOldProduct->next;
+void Delete(HPC &head, PPC oldProduct) {
+	if (oldProduct) {
+		if (head.Head == oldProduct) {
+			PPC temp = oldProduct->next;
+			delete (oldProduct);
+			head.Head = temp;
 		}
-		PPC temp = oldProduct->next;
-		delete (oldProduct);
-		prevOldProduct->next = temp;
+		else {
+			PPC prevOldProduct = head.Head;
+			while (prevOldProduct->next != oldProduct) {
+				prevOldProduct = prevOldProduct->next;
+			}
+			PPC temp = oldProduct->next;
+			delete (oldProduct);
+			prevOldProduct->next = temp;
+		}
+		head.count -= 1;
 	}
-	head.count -= 1;
 }
 
-void Delete(HPM head, PPM oldProduct) {
+void Delete(HPM &head, PPM oldProduct) {
 	if (head.Head == oldProduct) {
 		PPM temp = oldProduct->next;
 		delete (oldProduct);
@@ -458,7 +526,7 @@ void Delete(HPM head, PPM oldProduct) {
 	head.count -= 1;
 }
 
-void Delete(HPS head, PPS oldProduct) {
+void Delete(HPS &head, PPS oldProduct) {
 	if (head.Head == oldProduct) {
 		PPS temp = oldProduct->next;
 		delete (oldProduct);
@@ -476,7 +544,7 @@ void Delete(HPS head, PPS oldProduct) {
 	head.count -= 1;
 }
 
-void DeleteAll(HPC headCart) {
+void DeleteAll(HPC &headCart) {
 	PPC temp = headCart.Head;
 	while (temp) {
 		PPC temp2 = temp;
@@ -485,7 +553,7 @@ void DeleteAll(HPC headCart) {
 		}
 }
 
-void DeleteAll(HPM headMarket, HPS headStorage) {
+void DeleteAll(HPM& headMarket, HPS &headStorage) {
 	PPM temp = headMarket.Head;
 	PPS temp_ = headStorage.Head;
 	while (temp) {
@@ -497,6 +565,15 @@ void DeleteAll(HPM headMarket, HPS headStorage) {
 		PPS temp2_ = temp_;
 		temp_ = temp_->next;
 		delete (temp2_);
+	}
+}
+
+void DeleteAll(HO& headOrder) {
+	PO temp = headOrder.Head;
+	while (temp) {
+		PO temp2 = temp;
+		temp = temp->next;
+		delete (temp2);
 	}
 }
 
@@ -576,34 +653,7 @@ void Change(PPM product, HPS headStorage) {
 
 
 
-bool IsAlreadyIn(HPM headMarket, PPM product) {
-	PPM q = headMarket.Head;
-	while (q) {
-		if (not(q->Title == product->Title) && not(q->Description == product->Description) && not(q->Id == product->Id) &&
-			q->Price == product->Price && q->Available == product->Available) return true;
-		q = q->next;
-	}
-	return false;
-}
 
-bool IsAlreadyIn(HPS headStorage, PPS product) {
-	PPS q = headStorage.Head;
-	while (q) {
-		if (not(q->Title == product->Title) && not(q->Count == product->Count) && not(q->Id == product->Id)) return true;
-		q = q->next;
-	}
-	return false;
-}
-
-bool IsAlreadyIn(HPC headCart, PPC product) {
-	PPC q = headCart.Head;
-	while (q) {
-		if (not(q->Title == product->Title) && not(q->count == product->count) && not(q->Id == product->Id) &&
-			q->Price == product->Price && q->PriceForOne == product->PriceForOne) return true;
-		q = q->next;
-	}
-	return false;
-}
 
 
 void SaveMarket(HPM headMarket) {
@@ -642,16 +692,13 @@ void SaveCart(HPC headCart) {
 	}
 }
 
-void SaveOrder(HO headOrder) {
-	ofstream file("Cart.txt", ios::binary | ios::out);
+void SaveOrder(PO order) {
+	ofstream file("Order.txt", ios::binary | ios::app);
 	if (file.is_open()) {
-		PO temp = headOrder.Head;
-		while (temp != NULL) {
-			file.write((char*)&(*temp), sizeof((*temp)));
-			temp = temp->next;
-		}
+		file.write((char*)&(*order), sizeof((*order)));
 		file.close();
 	}
+	else cout << "Error with saving your order!\n";
 }
 
 void LoadMarket(HPM &headMarket) {
@@ -750,18 +797,62 @@ void LoadOrder(HO& headOrder) {
 	if (file.is_open() && not(file.peek() == EOF)) {
 		while (file.peek() != EOF) {
 			PO temp = new O;
+			PO right = new O;
 			if (headOrder.count == 0) {
 				file.read((char*)&(*temp), sizeof((*temp)));
 				temp->next = NULL;
-				AddFirst(headOrder, temp);
+
+				right->Id = temp->Id;
+				right->next = NULL;
+				AddFirst(headOrder, right);
 			}
 			else {
 				file.read((char*)&(*temp), sizeof((*temp)));
 				temp->next = NULL;
-				AddLast(headOrder, temp);
+				right->Id = temp->Id;
+				right->next = NULL;
+				AddLast(headOrder, right);
 			}
 		}
 		file.close();
 	}
 	else cout << "Empty file or can't open!\n\n";
+}
+
+int GetNewId() {
+	HO tempHead;
+	tempHead.count = 0;
+	tempHead.IsIntialized = true;
+	tempHead.Head = NULL;
+
+	LoadOrder(tempHead);
+	int maxId = 0;
+	PO current = tempHead.Head;
+	while (current) {
+		maxId = max(maxId, current->Id);
+		current = current->next;
+	}
+	maxId++;
+
+	DeleteAll(tempHead);
+	return  maxId;
+}
+
+PO Create(HPC headCart) {
+	PO newOrder = new O;
+	if (newOrder) {
+		newOrder->Id = GetNewId();
+		newOrder->next = NULL;
+
+		vector <PC> cart;
+		PPC current = headCart.Head;
+		for (int i = 0; i < headCart.count; i++) {
+			cart.push_back((*current));
+			current = current->next;
+		}
+
+		newOrder->Cart = cart;
+		return newOrder;
+	}
+	return NULL;
 }

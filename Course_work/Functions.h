@@ -1,5 +1,6 @@
 #pragma once
 #define POINTS 11
+#define POINTSUSER 9
 #define WIDTH 20
 #include <string>
 
@@ -7,11 +8,17 @@ using namespace std;
 
 bool* InitializeActive(bool*& active);
 
+bool* InitializeActiveUser(bool*& activeUser);
+
 void SetColor(int attr);
 
-void PrintMenu(bool* active);
+void PrintAdminMenu(bool* active);
+
+void PrintUserMenu(bool* activeUser);
 
 void PrintInsideMenu(int _case, int end);
+
+void PrintInsideMenuUser(int _case, int end);
 
 void PrintList(HPC head);
 
@@ -30,7 +37,11 @@ int EnterInsideChoice(int end);
 
 int GetNewId(HPM headMarket);
 
+int GetNewId();
+
 PPM Create(HPM headMarket);
+
+PO Create(HPC headCart);
 
 PPS MarketToStorage(PPM newProduct);
 
@@ -66,15 +77,17 @@ PPM SearchByName(string name, HPM head);
 
 PPS SearchByName(string name, HPS head);
 
-void Delete(HPC head, PPC oldProduct);
+void Delete(HPC& head, PPC oldProduct);
 
-void Delete(HPM head, PPM oldProduct);
+void Delete(HPM& head, PPM oldProduct);
 
-void Delete(HPS head, PPS oldProduct);
+void Delete(HPS& head, PPS oldProduct);
 
-void DeleteAll(HPC headCart);
+void DeleteAll(HPC& headCart);
 
-void DeleteAll(HPM headMarket, HPS headStorage);
+void DeleteAll(HPM& headMarket, HPS& headStorage);
+
+void DeleteAll(HO& headOrder);
 
 
 void Change(PPC product);
@@ -90,6 +103,8 @@ void SaveStorage(HPS headStorage);
 void SaveCart(HPC headCart);
 
 void SaveMarket(HPM headMarket);
+
+void SaveOrder(PO order);
 
 void LoadMarket(HPM &headMarket);
 

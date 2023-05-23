@@ -54,5 +54,8 @@
     <Text Include="Storage.txt">
       <Filter>BD</Filter>
     </Text>
+    <Text Include="Order.txt">
+      <Filter>BD</Filter>
+    </Text>
   </ItemGroup>
 </Project>
