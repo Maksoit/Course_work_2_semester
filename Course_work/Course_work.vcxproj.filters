@@ -48,5 +48,11 @@
     <Text Include="Market.txt">
       <Filter>BD</Filter>
     </Text>
+    <Text Include="Cart.txt">
+      <Filter>BD</Filter>
+    </Text>
+    <Text Include="Storage.txt">
+      <Filter>BD</Filter>
+    </Text>
   </ItemGroup>
 </Project>

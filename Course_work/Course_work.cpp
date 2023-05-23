@@ -273,11 +273,11 @@ int main()
 		}
 		case 8: {
 			HO headOrder;
-			headOrder.Head = NULL;
-			headOrder.count = 0;
+			headOrder.Head = Create(headCart);
+			headOrder.count = 1;
 			headOrder.IsIntialized = true;
 
-
+			
 
 			break;
 		}
