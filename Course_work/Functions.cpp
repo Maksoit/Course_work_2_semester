@@ -569,6 +569,7 @@ void DeleteAll(HPS& headStorage) {
 		temp_ = temp_->next;
 		delete (temp2_);
 	}
+	headStorage.Head = NULL;
 }
 
 void DeleteAll(HO& headOrder) {
