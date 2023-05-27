@@ -39,6 +39,7 @@ int main()
 				activeUser[1] = true;
 				activeUser[2] = true;
 				activeUser[3] = true;
+				activeUser[5] = true;
 				activeUser[POINTSUSER - 1] = true;
 				cout << "Empty cart list created!\n\n";
 				break;
@@ -98,7 +99,9 @@ int main()
 				}
 				}
 				cin.get();
-				for (int i = 4; i < 8; i++) activeUser[i] = true;
+				if (headCart.count) {
+					for (int i = 4; i < 8; i++) activeUser[i] = true;
+				}
 				break;
 			}
 			case 5: {
@@ -115,6 +118,7 @@ int main()
 						activeUser[1] = true;
 						activeUser[2] = true;
 						activeUser[3] = true;
+						activeUser[5] = true;
 						activeUser[POINTSUSER - 1] = true;
 					}
 				}
@@ -127,9 +131,15 @@ int main()
 				string title;
 				cout << "Enter title for searching: ";
 				cin >> title;
-				PPC product = SearchByName(title, headCart);
-				cout << "Id" << setw(WIDTH) << "Title" << setw(WIDTH) << "Count" << endl;
-				cout << product->Id << setw(WIDTH) << product->Title << setw(WIDTH) << product->count << endl;
+				PPM product = SearchByName(title, headMarket);
+				if (product) {
+					cout << "Id" << setw(WIDTH) << "Title" << setw(WIDTH) << "Price" << setw(WIDTH) << "Description" << setw(WIDTH) << "Available" << endl;
+						product->Available ? SetColor(7) : SetColor(8);
+						cout << product->Id << setw(WIDTH) << product->Title << setw(WIDTH) << product->Price << setw(WIDTH) << product->Description << setw(WIDTH) << product->Available << endl;
+						SetColor(7);
+					cin.get();
+				}
+				else cout << "There is no that product!\n";
 				cin.get();
 				break;
 			}
@@ -444,9 +454,24 @@ int main()
 				switch (EnterInsideChoice(2)) {
 				case 1:
 					LoadCart(headCart);
+					if (!headMarket.IsIntialized) {
+						headMarket.Head = NULL;
+						headMarket.count = 0;
+						headMarket.IsIntialized = 1;
+					}
+					if(!headStorage.IsIntialized) {
+						headStorage.Head = NULL;
+						headStorage.count = 0;
+						headStorage.IsIntialized = 1;
+					}
 					cout << "\nCart loaded from cart.txt!\n\n";
 					break;
 				case 2:
+					if (!headCart.IsIntialized) {
+						headCart.Head = NULL;
+						headCart.count = 0;
+						headCart.IsIntialized = 1;
+					}
 					LoadMarket(headMarket);
 					LoadStorage(headStorage);
 					cout << "\nMarket loaded from market.txt!\n\n";
