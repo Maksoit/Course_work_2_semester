@@ -85,7 +85,9 @@ void Delete(HPS& head, PPS oldProduct);
 
 void DeleteAll(HPC& headCart);
 
-void DeleteAll(HPM& headMarket, HPS& headStorage);
+void DeleteAll(HPM& headMarket);
+
+void DeleteAll(HPS& headStorage);
 
 void DeleteAll(HO& headOrder);
 

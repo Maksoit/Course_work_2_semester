@@ -348,7 +348,8 @@ int main()
 					DeleteAll(headCart);
 					break;
 				case 4:
-					DeleteAll(headMarket, headStorage);
+					DeleteAll(headMarket);
+					DeleteAll(headStorage);
 					break;
 				default:
 					cout << "Some error in main in switch in case 5\n\n";

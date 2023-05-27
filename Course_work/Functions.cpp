@@ -553,14 +553,17 @@ void DeleteAll(HPC &headCart) {
 		}
 }
 
-void DeleteAll(HPM& headMarket, HPS &headStorage) {
+void DeleteAll(HPM& headMarket) {
 	PPM temp = headMarket.Head;
-	PPS temp_ = headStorage.Head;
 	while (temp) {
 		PPM temp2 = temp;
 		temp = temp->next;
 		delete (temp2);
 	}
+}
+
+void DeleteAll(HPS& headStorage) {
+	PPS temp_ = headStorage.Head;
 	while (temp_) {
 		PPS temp2_ = temp_;
 		temp_ = temp_->next;
